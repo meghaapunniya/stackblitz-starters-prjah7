@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Player Beta</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
+    <style>
+      body {
+        background-color: #121212;
+        color: white;
+        font-family: Arial, sans-serif;
+      }
+      .player {
+        width: 300px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #181818;
+        border-radius: 8px;
+      }
+      .controls button {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5em;
+        cursor: pointer;
+      }
+      .progress-container {
+        background: #404040;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 10px 0;
+        height: 4px;
+        width: 100%;
+      }
+      .progress {
+        background-color: #1db954;
+        border-radius: 5px;
+        height: 100%;
+        width: 0%;
+      }
+      .time {
+        display: flex;
+        justify-content: space-between;
+      }
+      .search {
+        margin-top: 20px;
+        width: 100%;
+      }
+      .search input {
+        width: calc(100% - 20px);
+        padding: 10px;
+        background: #282828;
+        border: none;
+        color: white;
+      }
+      .sections div {
+        margin-top: 15px;
+        padding: 10px;
+        background: #282828;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="player">
+      <audio id="audioPlayer" controls style="display: none"></audio>
+      <div class="controls">
+        <button onclick="playPause()"><i class="fas fa-play"></i></button>
+        <div class="progress-container" onclick="seek(event)">
+          <div class="progress" id="progress"></div>
+        </div>
+        <div class="time">
+          <span id="currentTime">0:00</span>
+          <span id="duration">0:00</span>
+        </div>
+      </div>
+      <div class="search">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search for tracks, artists..."
+        />
+      </div>
+      <div class="sections">
+        <div id="lyrics">Lyrics will appear here</div>
+        <div id="recommendations">Recommendations</div>
+        <div id="credits">Track Credits</div>
+        <div id="genres">Explore Genres</div>
+      </div>
+    </div>
+
+    <script>
+      let audio = document.getElementById('audioPlayer');
+      let progress = document.getElementById('progress');
+      let currentTimeDisplay = document.getElementById('currentTime');
+      let durationDisplay = document.getElementById('duration');
+      let isPlaying = false;
+
+      function playPause() {
+        if (isPlaying) {
+          audio.pause();
+          document.querySelector('.fa-play').classList.remove('fa-pause');
+          document.querySelector('.fa-play').classList.add('fa-play');
+        } else {
+          audio.play();
+          document.querySelector('.fa-play').classList.add('fa-pause');
+          document.querySelector('.fa-play').classList.remove('fa-play');
+        }
+        isPlaying = !isPlaying;
+      }
+
+      audio.ontimeupdate = function () {
+        let percentage = (audio.currentTime / audio.duration) * 100;
+        progress.style.width = percentage + '%';
+        currentTimeDisplay.textContent = formatTime(audio.currentTime);
+        if (!isNaN(audio.duration)) {
+          durationDisplay.textContent = formatTime(audio.duration);
+        }
+      };
+
+      function formatTime(seconds) {
+        let min = Math.floor(seconds / 60);
+        let sec = Math.floor(seconds % 60);
+        return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+      }
+
+      function seek(event) {
+        const rect = event.target.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const width = rect.width;
+        const percent = Math.min(Math.max(0, x / width), 1);
+        audio.currentTime = percent * audio.duration;
+      }
+
+      // Placeholder for API interactions
+      function searchMusic(query) {
+        // Here you would call an API like Spotify's to fetch results
+        console.log('Searching for:', query);
+        // Update UI with results, this is a placeholder action
+        document.getElementById(
+          'recommendations'
+        ).innerText = `Search results for "${query}"`;
+      }
+
+      document
+        .getElementById('searchInput')
+        .addEventListener('keypress', function (e) {
+          if (e.key === 'Enter') {
+            searchMusic(this.value);
+          }
+        });
+
+      // Dummy function to simulate changing tracks
+      function changeTrack(trackUrl, lyrics, credits) {
+        audio.src = trackUrl;
+        document.getElementById('lyrics').innerText = lyrics;
+        document.getElementById('credits').innerText = `Credits: ${credits}`;
+        playPause(); // This will play the new track
+      }
+
+      // Initial dummy track setup
+      changeTrack(
+        'path_to_audio.mp3',
+        'No lyrics available',
+        'Artist - Songwriter, Producer'
+      );
+
+      // Here you would fetch and display real data from music APIs for lyrics, recommendations, credits, and genres.
+    </script>
+  </body>
+</html>

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Music Player</title>
+    <link
+      rel="icon"
+      href="data:image/x-icon;base64,AAABAAEAEBAAAAAAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    />
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #121212;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin-top: 4px;
+        margin-bottom: 4px;
+        padding: 20px;
+        overflow: hidden;
+      }
+
+      .player {
+        background-color: #282828;
+        border-radius: 12px;
+        padding: 20px;
+        width: 300px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        /* Hide overflow for the player */
+      }
+
+      .album-art {
+        width: 100%;
+        height: 300px;
+        background-image: url('https://i.scdn.co/image/ab67616d0000b273fa258529452f4ed34cc961b1');
+        background-size: cover;
+        background-position: center;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 24px;
+        text-align: center;
+      }
+
+      p {
+        margin: 5px 0 20px;
+        font-size: 16px;
+        color: #b3b3b3;
+        text-align: center;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      button {
+        background-color: #1db954;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 20px;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #1ed760;
+      }
+
+      button:disabled {
+        background-color: #535353;
+        cursor: not-allowed;
+      }
+
+      #progress-bar {
+        width: 100%;
+        height: 5px;
+        background-color: #535353;
+        border-radius: 2.5px;
+        margin-top: 20px;
+        position: relative;
+      }
+
+      #progress {
+        width: 0;
+        height: 100%;
+        background-color: #1db954;
+        border-radius: 2.5px;
+        transition: width 0.1s linear;
+      }
+
+      #time {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #b3b3b3;
+        margin-top: 5px;
+      }
+
+      .info-section {
+        margin-top: 20px;
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        padding: 15px;
+        display: none;
+      }
+
+      .toggle-btn {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-size: 18px;
+        margin-top: 5px;
+        padding: 5px;
+        background-color: #383838;
+        border-radius: 8px;
+      }
+
+      .toggle-btn span {
+        font-size: 14px;
+        color: #b3b3b3;
+      }
+
+      .info-section h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      .info-section ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+      }
+
+      .info-section li {
+        margin-bottom: 5px;
+      }
+
+      #lyrics {
+        white-space: pre-wrap;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      #recommendations {
+        margin-top: 20px;
+      }
+
+      #recommendations h3 {
+        margin-bottom: 10px;
+      }
+
+      .recommendation {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+      }
+
+      .recommendation:hover {
+        background-color: #383838;
+      }
+
+      .recommendation img {
+        width: 50px;
+        height: 50px;
+        margin-right: 10px;
+        border-radius: 4px;
+      }
+
+      .recommendation-info {
+        flex-grow: 1;
+      }
+
+      .recommendation-title {
+        font-weight: bold;
+        margin-bottom: 3px;
+      }
+
+      .recommendation-artist {
+        font-size: 12px;
+        color: #b3b3b3;
+      }
+
+      .explore-section {
+        height: 10vh;
+        margin-top: 20px;
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        padding: 15px;
+      }
+
+      .scrolling {
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 30vh;
+      }
+      .scrolling::-webkit-scrollbar-track {
+        background: #282828;
+      }
+
+      /* Handle */
+      .scrolling::-webkit-scrollbar-thumb {
+        background: #383838;
+      }
+
+      /* Handle on hover */
+      .scrolling::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+      .explore-section h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      .genre-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+      }
+
+      .genre-item {
+        background-color: #282828;
+        border-radius: 4px;
+        padding: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .genre-item:hover {
+        background-color: #383838;
+      }
+
+      .genre-item img {
+        width: 80px;
+        height: 80px;
+        border-radius: 4px;
+        margin-bottom: 5px;
+      }
+
+      .search-bar {
+        margin-bottom: 15px;
+      }
+
+      .search-bar input {
+        width: 90%;
+        padding: 8px;
+        border: none;
+        border-radius: 4px;
+        background-color: #282828;
+        color: white;
+      }
+
+      .search-results {
+        margin-top: 15px;
+      }
+
+      .search-result-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 5px;
+        border-radius: 4px;
+        background-color: #282828;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .search-result-item:hover {
+        background-color: #383838;
+      }
+
+      .search-result-item img {
+        width: 50px;
+        height: 50px;
+        margin-right: 10px;
+        border-radius: 4px;
+      }
+
+      .search-result-info {
+        flex-grow: 1;
+      }
+
+      .search-result-title {
+        font-weight: bold;
+        margin-bottom: 3px;
+      }
+
+      .search-result-artist {
+        font-size: 12px;
+        color: #b3b3b3;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="player">
+      <div class="album-art"></div>
+      <h2 id="track-name">I've Been Meaning to Call</h2>
+      <p id="artist-name">Adam Sanders</p>
+      <div class="controls">
+        <button id="play">Play</button>
+        <button id="pause" disabled>Pause</button>
+        <button id="resume" disabled>Resume</button>
+      </div>
+      <div id="progress-bar">
+        <div id="progress"></div>
+      </div>
+      <div id="time">
+        <span id="current-time">0:00</span>
+        <span id="duration">0:00</span>
+      </div>
+      <audio
+        id="audio"
+        src="https://p.scdn.co/mp3-preview/cd5512fefd012b5bbfe2ddc0aa8d925c64e25015?cid=d8a5ed958d274c2e8ee717e6a4b0971d"
+      ></audio>
+      <div class="scrolling">
+        <!-- Track Credits Toggle -->
+        <div class="toggle-btn" id="toggle-credits">
+          <h3>Track Credits</h3>
+          <span id="credits-arrow">▼</span>
+        </div>
+        <div class="info-section" id="credits-section">
+          <div id="credits"></div>
+        </div>
+
+        <!-- Lyrics Toggle -->
+        <div class="toggle-btn" id="toggle-lyrics">
+          <h3>Lyrics</h3>
+          <span id="lyrics-arrow">▼</span>
+        </div>
+        <div class="info-section" id="lyrics-section">
+          <div id="lyrics"></div>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div id="recommendations">
+          <h3>Recommended Tracks</h3>
+          <div id="recommendations-list"></div>
+        </div>
+
+        <!-- Explore Section -->
+        <div class="explore-section">
+          <h3>Explore</h3>
+          <div class="search-bar">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search for tracks, artists, or albums"
+            />
+          </div>
+          <div class="genre-grid" id="genre-grid"></div>
+          <div class="search-results" id="search-results"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const audio = document.getElementById('audio');
+      const playBtn = document.getElementById('play');
+      const pauseBtn = document.getElementById('pause');
+      const resumeBtn = document.getElementById('resume');
+      const progressBar = document.getElementById('progress');
+      const currentTimeSpan = document.getElementById('current-time');
+      const durationSpan = document.getElementById('duration');
+      const creditsDiv = document.getElementById('credits');
+      const lyricsDiv = document.getElementById('lyrics');
+      const creditsSection = document.getElementById('credits-section');
+      const lyricsSection = document.getElementById('lyrics-section');
+      const toggleCreditsBtn = document.getElementById('toggle-credits');
+      const toggleLyricsBtn = document.getElementById('toggle-lyrics');
+      const creditsArrow = document.getElementById('credits-arrow');
+      const lyricsArrow = document.getElementById('lyrics-arrow');
+      const recommendationsList = document.getElementById(
+        'recommendations-list'
+      );
+      const genreGrid = document.getElementById('genre-grid');
+      const searchInput = document.getElementById('search-input');
+      const searchResults = document.getElementById('search-results');
+
+      // Toggle credits section
+      toggleCreditsBtn.addEventListener('click', () => {
+        if (
+          creditsSection.style.display === 'none' ||
+          !creditsSection.style.display
+        ) {
+          creditsSection.style.display = 'block';
+          creditsArrow.textContent = '▲';
+        } else {
+          creditsSection.style.display = 'none';
+          creditsArrow.textContent = '▼';
+        }
+      });
+
+      // Toggle lyrics section
+      toggleLyricsBtn.addEventListener('click', () => {
+        if (
+          lyricsSection.style.display === 'none' ||
+          !lyricsSection.style.display
+        ) {
+          lyricsSection.style.display = 'block';
+          lyricsArrow.textContent = '▲';
+        } else {
+          lyricsSection.style.display = 'none';
+          lyricsArrow.textContent = '▼';
+        }
+      });
+
+      playBtn.addEventListener('click', () => {
+        audio.play();
+        playBtn.disabled = true;
+        pauseBtn.disabled = false;
+        resumeBtn.disabled = true;
+      });
+
+      pauseBtn.addEventListener('click', () => {
+        audio.pause();
+        pauseBtn.disabled = true;
+        resumeBtn.disabled = false;
+      });
+
+      resumeBtn.addEventListener('click', () => {
+        audio.play();
+        pauseBtn.disabled = false;
+        resumeBtn.disabled = true;
+      });
+
+      audio.addEventListener('loadedmetadata', () => {
+        durationSpan.textContent = formatTime(audio.duration);
+      });
+
+      audio.addEventListener('timeupdate', () => {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = `${progress}%`;
+        currentTimeSpan.textContent = formatTime(audio.currentTime);
+      });
+
+      audio.addEventListener('ended', () => {
+        playBtn.disabled = false;
+        pauseBtn.disabled = true;
+        resumeBtn.disabled = true;
+        progressBar.style.width = '0%';
+        currentTimeSpan.textContent = '0:00';
+      });
+
+      function formatTime(time) {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60)
+          .toString()
+          .padStart(2, '0');
+        return `${minutes}:${seconds}`;
+      }
+
+      async function fetchTrackCredits() {
+        const url =
+          'https://spotify23.p.rapidapi.com/track_credits/?id=4WNcduiCmDNfmTEz7JvmLv';
+        const options = {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-key':
+              'a6f5bf0265mshd8de690ce4324c4p1f164djsn1cee87f72058',
+            'x-rapidapi-host': 'spotify23.p.rapidapi.com',
+          },
+        };
+
+        try {
+          const response = await fetch(url, options);
+          const result = await response.json();
+          displayTrackCredits(result);
+        } catch (error) {
+          console.error(error);
+          creditsDiv.textContent = 'Failed to load track credits.';
+        }
+      }
+
+      function displayTrackCredits(credits) {
+        let creditsHTML = '';
+        credits.roleCredits.forEach((role) => {
+          creditsHTML += `<h4>${role.roleTitle}</h4><ul>`;
+          role.artists.forEach((artist) => {
+            creditsHTML += `<li>${artist.name} (${artist.subroles.join(
+              ', '
+            )})</li>`;
+          });
+          creditsHTML += '</ul>';
+        });
+        creditsDiv.innerHTML = creditsHTML;
+      }
+
+      async function fetchLyrics() {
+        const url =
+          'https://spotify23.p.rapidapi.com/track_lyrics/?id=1brwdYwjltrJo7WHpIvbYt';
+        const options = {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-key':
+              'e062bf0f18msh70d378686515590p199f3djsnafe6501e5e22',
+            'x-rapidapi-host': 'spotify23.p.rapidapi.com',
+          },
+        };
+
+        try {
+          const response = await fetch(url, options);
+          const result = await response.json();
+          displayLyrics(result);
+        } catch (error) {
+          console.error(error);
+          lyricsDiv.textContent = 'Failed to load lyrics.';
+        }
+      }
+
+      function displayLyrics(lyricsData) {
+        const lyrics = lyricsData.lyrics.lines
+          .map((line) => line.words)
+          .join('\n');
+        lyricsDiv.textContent = lyrics;
+      }
+
+      async function fetchRecommendations() {
+        const url =
+          'https://spotify23.p.rapidapi.com/recommendations/?limit=20&seed_tracks=0c6xIDDpzE81m2q797ordA&seed_artists=4NHQUGzhtTLFvgF5SZesLK&seed_genres=classical%2Ccountry';
+        const options = {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-key':
+              '908cdb8788mshedd6d6217356142p1f4162jsn80b37ce08d7a',
+            'x-rapidapi-host': 'spotify23.p.rapidapi.com',
+          },
+        };
+
+        try {
+          const response = await fetch(url, options);
+          const result = await response.json();
+          console.log(result.tracks);
+          displayRecommendations(result.tracks);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      function displayRecommendations(recommendations) {
+        recommendationsList.innerHTML = '';
+        recommendations.forEach((track) => {
+          const recommendation = document.createElement('div');
+          recommendation.className = 'recommendation';
+          recommendation.innerHTML = `
+          <img src="${track.album.images[0].url}" alt="${track.name} album art">
+          <div class="recommendation-info">
+            <div class="recommendation-title">${track.name}</div>
+            <div class="recommendation-artist">${track.artists[0].name}</div>
+          </div>
+        `;
+          recommendation.addEventListener('click', () => {
+            // Here you would implement the logic to play the selected track
+            playTrack(track);
+            console.log(`Playing: ${track.name} by ${track.artists[0].name}`);
+          });
+          recommendationsList.appendChild(recommendation);
+        });
+      }
+
+      async function fetchGenres() {
+        const url = 'https://spotify23.p.rapidapi.com/browse_all/';
+        const options = {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-key':
+              '80ad8444b7mshd42a3de8d5216d0p1bf510jsn99f5f7f8e793',
+            'x-rapidapi-host': 'spotify23.p.rapidapi.com',
+          },
+        };
+
+        try {
+          const response = await fetch(url, options);
+          const result = await response.json();
+          const genres =
+            result.data.browseStart.sections.items[0].sectionItems.items;
+          displayGenres(genres);
+        } catch (error) {
+          console.error('Error fetching genres:', error);
+          genreGrid.innerHTML =
+            'Failed to load genres. Please try again later.';
+        }
+      }
+
+      function displayGenres(genres) {
+        genreGrid.innerHTML = '';
+        genres.forEach((genre) => {
+          if (genre.content && genre.content.data && genre.content.data.data) {
+            const genreData = genre.content.data.data;
+            if (genreData.cardRepresentation) {
+              const genreElement = document.createElement('div');
+              genreElement.className = 'genre-item';
+              genreElement.innerHTML = `
+              <img src="${genreData.cardRepresentation.artwork.sources[0].url}" alt="${genreData.cardRepresentation.title.transformedLabel}">
+              <div>${genreData.cardRepresentation.title.transformedLabel}</div>
+            `;
+              genreGrid.appendChild(genreElement);
+            }
+          }
+        });
+      }
+
+      async function searchSpotify(query) {
+        const url = `https://spotify23.p.rapidapi.com/search/?type=multi&offset=0&limit=10&numberOfTopResults=5&q=${encodeURIComponent(
+          query
+        )}`;
+        const options = {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-key':
+              '966bd71e74mshb3b1b9cb8c47d6dp1ac083jsnd885959534ab',
+            'x-rapidapi-host': 'spotify23.p.rapidapi.com',
+          },
+        };
+
+        try {
+          const response = await fetch(url, options);
+          const result = await response.json();
+          console.log('searchResults', result);
+          displaySearchResults(result);
+        } catch (error) {
+          console.error('Error searching Spotify:', error);
+          searchResults.innerHTML =
+            'An error occurred while searching. Please try again.';
+        }
+      }
+
+      function displaySearchResults(results) {
+        searchResults.innerHTML = '';
+        const types = ['tracks', 'artists', 'albums'];
+        types.forEach((type) => {
+          if (results[type] && results[type].items.length > 0) {
+            results[type].items.slice(0, 3).forEach((item) => {
+              const resultElement = document.createElement('div');
+              resultElement.className = 'search-result-item';
+              let imageUrl, name, artistName;
+
+              if (type === 'tracks') {
+                imageUrl = item.data.albumOfTrack.coverArt.sources[0].url;
+                name = item.data.name;
+                artistName = item.data.artists.items[0].profile.name;
+              } else if (type === 'artists') {
+                imageUrl = item.data.visuals.avatarImage.sources[0].url;
+                name = item.data.profile.name;
+                artistName = 'Artist';
+              } else if (type === 'albums') {
+                imageUrl = item.data.coverArt.sources[0].url;
+                name = item.data.name;
+                artistName = item.data.artists.items[0].profile.name;
+              }
+
+              resultElement.innerHTML = `
+              <img src="${imageUrl}" alt="${name}">
+              <div class="search-result-info">
+                <div class="search-result-title">${name}</div>
+                <div class="search-result-artist">${artistName}</div>
+              </div>
+            `;
+
+              searchResults.appendChild(resultElement);
+            });
+          }
+        });
+      }
+
+      function playTrack(trackData) {
+        // Update player UI
+        document.getElementById('track-name').textContent = trackData.name;
+        document.getElementById('artist-name').textContent =
+          trackData.artists[0].name;
+
+        // Set audio source and play
+        // Note: This assumes the track has a preview_url. In a real implementation,
+        // you'd need to handle cases where preview_url is not available.
+        if (trackData.preview_url) {
+          audio.src = trackData.preview_url;
+          audio.play();
+          playBtn.disabled = true;
+          pauseBtn.disabled = false;
+          resumeBtn.disabled = true;
+        } else {
+          document.getElementById(
+            'track-name'
+          ).textContent = `I've Been Meaning to Call`;
+          document.getElementById('artist-name').textContent = 'Adam Sanders';
+          console.log('No preview available for this track');
+          // Optionally, display a message to the user
+        }
+      }
+
+      searchInput.addEventListener(
+        'input',
+        debounce(() => {
+          const query = searchInput.value.trim();
+          if (query.length > 2) {
+            searchSpotify(query);
+          } else {
+            searchResults.innerHTML = '';
+          }
+        }, 300)
+      );
+
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+
+      fetchTrackCredits();
+      fetchLyrics();
+      fetchRecommendations();
+      fetchGenres();
+    </script>
+  </body>
+</html>
