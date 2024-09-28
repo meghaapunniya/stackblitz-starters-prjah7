@@ -1,5 +1,4 @@
-YOUR_API_KEY = 80ad8444b7mshd42a3de8d5216d0p1bf510jsn99f5f7f8e793
-from rapidapi.com
+rapidapi.com
 
 TrackCredits: a6f5bf0265mshd8de690ce4324c4p1f164djsn1cee87f72058
 Lyrics: e062bf0f18msh70d378686515590p199f3djsnafe6501e5e22
